@@ -1,0 +1,159 @@
+#!/bin/bash
+
+# MoodyRain v2 by Glutanimate
+# License: GNU GPLv3
+# Dependencies: yad, mpv, exiftool
+
+# Variables
+
+Executable="$(readlink -f "$0")"
+ProgDir="${Executable%/*}"
+SoundDir="$ProgDir/sounds"
+ConfigFile="$HOME/.config/moodyrain.cfg"
+
+# Gui
+
+TrayIcon="rhythmbox-panel"
+WmIcon="gnome-audio"
+ThumbIcon="gnome-audio"
+YadTitle="MoodyRain"
+WmClass="moodyrain"
+YadHeight="150"
+YadWidth="500"
+
+GuiTxtDescr="<b>Please select one or more ambient sounds</b>.
+Place ogg files in './sounds' to add more choices."
+GuiTxtPlay="Play selected sounds without saving soundscape"
+GuiTxtPlaySave="Save soundscape and play selected sounds"
+GuiTxtCancel="Cancel and quit"
+GuiTxtReset="Reset all volume sliders to 0"
+
+# Functions
+
+arg_compile_sounds(){
+  unset Sounds SoundID File
+  while IFS= read -r -d '' File; do
+    if [[ ! "$(file -ib "$File")" == *application/ogg* ]]; then
+      echo "Error: '$File' is not an ogg file. Ignoring."
+      continue
+    fi
+    TagData="$(exiftool -S -Artist -Title "$File")"
+    Sounds[$SoundID]="$File"
+    Titles[$SoundID]="$(echo "$TagData" | sed -n 's/Title: //p')"
+    Artists[$SoundID]="$(echo "$TagData" | sed -n 's/Artist: //p')"
+    if [[ -z "${Titles[$SoundID]}" ]]; then
+      Titles[$SoundID]="${File##*/}"
+    fi
+    if [[ -z "${Artists[$SoundID]}" ]]; then
+      Artists[SoundID]="?"
+    fi
+    ((SoundID++))
+  done < <(find "$SoundDir" -type f -name '*.ogg' -print0 | sort -z --version-sort)
+}
+
+arg_compose_gui(){
+  OLDIFS=$IFS
+  IFS=$'\n'
+  GuiScaleArray=(\
+    $(for i in "${!Sounds[@]}"; do echo "--field=${Titles[$i]} (${Artists[$i]}): :SCL"; done)\
+  )
+  IFS=$OLDIFS
+  export ScaleEndField=$((4 + ${#Sounds[@]})) # set last volume slider field in yad gui
+  YadHeight=$(($YadHeight + ${#Sounds[@]} * 45)) # adjust GUI height
+}
+
+arg_read_config(){
+    [[ -f "$ConfigFile" ]] && CustomVolume="$(cat "$ConfigFile" | cut -d ' ' -f 1-"${#Sounds[@]}")" 
+    # ↑ cut off surplus values
+    [[ -z "$CustomVolume" ]] && CustomVolume=$(printf "%0.s0 " $(seq 1 "${#Sounds[@]}"))
+}
+
+gui_select_sounds(){
+  YadResult="$(yad --form --scroll \
+  --always-print-result \
+  --image="$ThumbIcon" --window-icon="$WmIcon" \
+  --class="$WmClass" \
+  --title="$YadTitle" \
+  --field="$GuiTxtDescr":LBL "" \
+  --center --height=$YadHeight --width=$YadWidth \
+  --field="":LBL "" \
+  --field "_Reset all volume sliders!gtk-clear!$GuiTxtReset":FBTN \
+      "@bash -c gui_resetbtn_onclick" \
+  --field="":LBL "" \
+  "${GuiScaleArray[@]}" \
+  --button="_Cancel!gtk-cancel!$GuiTxtCancel:1" \
+  --button="_Save and play!gtk-ok!$GuiTxtPlaySave:2" \
+  --button="_Play!gtk-ok!$GuiTxtPlay:4" \
+  $CustomVolume)"
+
+  YadChoicesRet="$?"
+  CustomVolume=($(echo "$YadResult" | cut -d '|' -f5- | tr '|' ' '))
+  # Volumes begin in field 5 of yad output
+
+  if [[ "$YadChoicesRet" = "2" ]]; then
+    echo "${CustomVolume[@]}" > "$ConfigFile"
+  elif [[ "$YadChoicesRet" != "4" ]]; then
+    echo "GUI exit"
+    exit 1
+  fi
+}
+
+gui_resetbtn_onclick(){
+  # reset yad sliders
+  for ((i=5;i<=ScaleEndField;++i)); do
+    echo "$i:0"
+  done
+}
+
+gui_systray () {
+    yad --notification \
+    --text="MoodyRain" \
+    --image="$TrayIcon" \
+    --no-middle --command="" \
+    --menu="Ambience selection!bash -c gui_systray_onclick!$ThumbIcon||Exit!kill -s TERM $TopPid!exit"&
+    YadPid="$!"
+}
+
+gui_systray_onclick(){
+  kill -s TERM "$TopPid"
+  "$TopScript" > /dev/null 2>&1 & 
+}
+
+player(){
+  for i in "${!CustomVolume[@]}"; do
+    if [[ "${CustomVolume[$i]}" = 0 || -z "${CustomVolume[$i]}" ]]; then
+      continue
+    fi
+    echo "Playing ${Titles[$i]} by ${Artists[$i]} at ${CustomVolume[$i]}% volume"
+    mpv --loop=inf --vo null --volume="${CustomVolume[$i]}" --gapless-audio=yes "${Sounds[$i]}" > /dev/null 2>&1 &
+    PlayerPids+=("$!")
+  done
+  [[ -n "${PlayerPids[0]}" ]] && wait "${PlayerPids[0]}"
+}
+
+cleanup(){
+  for i in "${PlayerPids[@]}"; do
+    kill -s TERM "$i"
+  done
+  [[ -n "$YadPid" ]] && kill -s TERM "$YadPid"
+  kill -s TERM "$TopPid"
+}
+
+# Preamble
+
+export -f gui_resetbtn_onclick
+export -f gui_systray_onclick
+export TopScript="$0"
+export TopPid=$$
+PlayerPids=()
+
+trap "cleanup; exit" EXIT
+
+# Main
+
+arg_compile_sounds
+arg_compose_gui
+arg_read_config
+gui_select_sounds
+gui_systray
+player
