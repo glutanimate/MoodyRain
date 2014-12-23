@@ -33,7 +33,8 @@ GuiTxtReset="Reset all volume sliders to 0"
 arg_compile_sounds(){
   unset Sounds SoundID File
   while IFS= read -r -d '' File; do
-    if [[ ! "$(file -ib "$File")" == *application/ogg* ]]; then
+    echo "$File"
+    if [[ ! "$(file -Lib "$File")" == *application/ogg* ]]; then
       echo "Error: '$File' is not an ogg file. Ignoring."
       continue
     fi
@@ -48,7 +49,7 @@ arg_compile_sounds(){
       Artists[SoundID]="?"
     fi
     ((SoundID++))
-  done < <(find "$SoundDir" -type f -name '*.ogg' -print0 | sort -z --version-sort)
+  done < <(find -L "$SoundDir" -type f -name '*.ogg' -print0 | sort -z --version-sort)
 }
 
 arg_compose_gui(){
