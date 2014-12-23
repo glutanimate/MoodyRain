@@ -2,7 +2,7 @@
 
 # MoodyRain v2 by Glutanimate
 # License: GNU GPLv3
-# Dependencies: yad, mpv, exiftool
+# Dependencies: yad, mpv, vorbis-tools
 
 # Variables
 
@@ -38,10 +38,10 @@ arg_compile_sounds(){
       echo "Error: '$File' is not an ogg file. Ignoring."
       continue
     fi
-    TagData="$(exiftool -S -Artist -Title "$File")"
+    TagData="$(ogginfo "$File")"
     Sounds[$SoundID]="$File"
-    Titles[$SoundID]="$(echo "$TagData" | sed -n 's/Title: //p')"
-    Artists[$SoundID]="$(echo "$TagData" | sed -n 's/Artist: //p')"
+    Titles[$SoundID]="$(echo "$TagData" | sed -n 's/\tTITLE=//p')"
+    Artists[$SoundID]="$(echo "$TagData" | sed -n 's/\tARTIST=//p')"
     if [[ -z "${Titles[$SoundID]}" ]]; then
       Titles[$SoundID]="${File##*/}"
     fi

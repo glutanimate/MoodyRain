@@ -22,11 +22,11 @@
 
 ### Dependencies
 
-MoodyRain depends on `yad`, `mpv`, and `exiftool`. On Ubuntu 14.04 and up you can install all dependencies with the following commands:
+MoodyRain depends on `yad`, `mpv`, and `vorbis-tools`. On Ubuntu 14.04 and up you can install all dependencies with the following commands:
 
     sudo add-apt-repository ppa:webupd8team/y-ppa-manager
     sudo apt-get update
-    sudo apt-get install yad mpv libimage-exiftool-perl
+    sudo apt-get install yad mpv vorbis-tools
 
 ### Setup
 
