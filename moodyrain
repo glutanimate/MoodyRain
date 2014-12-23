@@ -19,7 +19,7 @@ ThumbIcon="gnome-audio"
 YadTitle="MoodyRain"
 WmClass="moodyrain"
 YadHeight="150"
-YadWidth="500"
+YadWidth="600"
 
 GuiTxtDescr="<b>Please select one or more ambient sounds</b>.
 Place ogg files in './sounds' to add more choices."
@@ -33,7 +33,6 @@ GuiTxtReset="Reset all volume sliders to 0"
 arg_compile_sounds(){
   unset Sounds SoundID File
   while IFS= read -r -d '' File; do
-    echo "$File"
     if [[ ! "$(file -Lib "$File")" == *application/ogg* ]]; then
       echo "Error: '$File' is not an ogg file. Ignoring."
       continue
@@ -46,7 +45,7 @@ arg_compile_sounds(){
       Titles[$SoundID]="${File##*/}"
     fi
     if [[ -z "${Artists[$SoundID]}" ]]; then
-      Artists[SoundID]="?"
+      Artists[SoundID]="unknown"
     fi
     ((SoundID++))
   done < <(find -L "$SoundDir" -type f -name '*.ogg' -print0 | sort -z --version-sort)
@@ -56,11 +55,14 @@ arg_compose_gui(){
   OLDIFS=$IFS
   IFS=$'\n'
   GuiScaleArray=(\
-    $(for i in "${!Sounds[@]}"; do echo "--field=${Titles[$i]} (${Artists[$i]}): :SCL"; done)\
+    $(for i in "${!Sounds[@]}"; do echo "--field=${Titles[$i]} (<i>${Artists[$i]}</i>): :SCL"; done)\
   )
   IFS=$OLDIFS
   export ScaleEndField=$((4 + ${#Sounds[@]})) # set last volume slider field in yad gui
   YadHeight=$(($YadHeight + ${#Sounds[@]} * 45)) # adjust GUI height
+  if [[ "$YadHeight" -gt "800" ]]; then # set maximum height
+    YadHeight="700"
+  fi
 }
 
 arg_read_config(){
