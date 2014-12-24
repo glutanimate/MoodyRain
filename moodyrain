@@ -33,7 +33,7 @@ GuiTxtReset="Reset all volume sliders to 0"
 arg_compile_sounds(){
   unset Sounds SoundID File
   while IFS= read -r -d '' File; do
-    if [[ ! "$(file -Lib "$File")" == *application/ogg* ]]; then
+    if [[ ! "$(file -Lib "$File")" == */ogg* ]]; then
       echo "Error: '$File' is not an ogg file. Ignoring."
       continue
     fi
