@@ -6,4 +6,4 @@ Terminal=false
 Exec=moodyrain
 Name=MoodyRain
 Comment=Generate relaxing ambient sounds
-Icon=gnome-audio
+Icon=preferences-desktop-multimedia

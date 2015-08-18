@@ -14,8 +14,8 @@ ConfigFile="$HOME/.config/moodyrain.cfg"
 # Gui
 
 TrayIcon="rhythmbox-panel"
-WmIcon="gnome-audio"
-ThumbIcon="gnome-audio"
+WmIcon="preferences-desktop-multimedia"
+ThumbIcon="preferences-desktop-multimedia"
 YadTitle="MoodyRain"
 WmClass="moodyrain"
 YadHeight="150"
