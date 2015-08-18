@@ -13,7 +13,7 @@ ConfigFile="$HOME/.config/moodyrain.cfg"
 
 # Gui
 
-TrayIcon="rhythmbox-panel"
+TrayIcon="$ProgDir/icons/trayicon.png"
 WmIcon="preferences-desktop-multimedia"
 ThumbIcon="preferences-desktop-multimedia"
 YadTitle="MoodyRain"
