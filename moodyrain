@@ -39,8 +39,8 @@ arg_compile_sounds(){
     fi
     TagData="$(ogginfo "$File")"
     Sounds[$SoundID]="$File"
-    Titles[$SoundID]="$(echo "$TagData" | sed -n 's/\tTITLE=//p')"
-    Artists[$SoundID]="$(echo "$TagData" | sed -n 's/\tARTIST=//p')"
+    Titles[$SoundID]="$(echo "$TagData" | sed -n 's/\tTITLE=//ip')"
+    Artists[$SoundID]="$(echo "$TagData" | sed -n 's/\tARTIST=//ip')"
     if [[ -z "${Titles[$SoundID]}" ]]; then
       Titles[$SoundID]="${File##*/}"
     fi
