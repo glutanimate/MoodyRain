@@ -2,7 +2,11 @@
 
 # MoodyRain v2 by Glutanimate
 # License: GNU GPLv3
-# Dependencies: yad, mpv, vorbis-tools
+# Dependencies: yad, sox/mpv, vorbis-tools
+
+# Settings
+
+AudioPlayer="sox" # must be either mpv or sox
 
 # Variables
 
@@ -128,8 +132,13 @@ player(){
       continue
     fi
     echo "Playing ${Titles[$i]} by ${Artists[$i]} at ${CustomVolume[$i]}% volume"
-    mpv --loop=inf --vo null --volume="${CustomVolume[$i]}" --gapless-audio=yes "${Sounds[$i]}" > /dev/null 2>&1 &
-    PlayerPids+=("$!")
+    if [[ "$AudioPlayer" = "mpv" ]]; then
+      mpv --loop=inf --vo null --volume="${CustomVolume[$i]}" --gapless-audio=yes "${Sounds[$i]}" > /dev/null 2>&1 &
+      PlayerPids+=("$!")
+    else
+      play -v $(echo "${CustomVolume[$i]}/10" | awk '{print $1/100}') "${Sounds[$i]}" repeat 199999999 > /dev/null 2>&1 &
+      PlayerPids+=("$!")
+    fi
   done
   [[ -n "${PlayerPids[0]}" ]] && wait "${PlayerPids[0]}"
 }

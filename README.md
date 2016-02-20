@@ -22,11 +22,13 @@
 
 ### Dependencies
 
-MoodyRain depends on `yad`, `mpv`, and `vorbis-tools`. On Ubuntu 14.04 and up you can install all dependencies with the following commands:
+MoodyRain depends on `yad`, `sox`, and `vorbis-tools`. On Ubuntu 14.04 and up you can install all dependencies with the following commands:
 
     sudo add-apt-repository ppa:webupd8team/y-ppa-manager
     sudo apt-get update
-    sudo apt-get install yad mpv vorbis-tools
+    sudo apt-get install yad sox vorbis-tools
+
+**Important note**: MoodyRain has recently switched from `mpv` to `sox` for audio playback. If you are updating from an earlier release of the script you will have to install `sox` first.
 
 ### Setup
 
@@ -58,17 +60,13 @@ To change your ambience or stop the playback, right-click on the systray icon an
 
 ### Additional sounds
 
-Moodyrain comes with five different ambiences by default, but these can be extended by placing additional `.ogg` files in the `sounds` directory next to the script. You will be able to achieve the best results with seamless high-fidelity loops. Please make sure to fill out the `Title` and `Artist` tags when creating your `.ogg` files.
+MoodyRain comes with five different ambiences by default. These can be extended by placing additional `.ogg` files in the `sounds` directory next to the script. You will achieve the best results with seamless high-fidelity loops. MoodyRain supports `Title` and `Artist` tags, so make sure to fill these out when creating your own ogg files.
 
-For further information on composing your own ambient sound samples check out the [*Sounds* section of the Ambientsounds project](https://github.com/Muges/ambientsounds#sounds) by [Muges](https://github.com/Muges).
-
-Please feel free to file pull requests to add more sounds to the repository, as long as you make sure to only use free sounds (public domain/creative-commons). [Freesound](http://www.freesound.org/) is a great source for such samples.
+For further information on composing ambient sound samples check out the [*Sounds* section of the Ambientsounds project](https://github.com/Muges/ambientsounds#sounds) by [Muges](https://github.com/Muges).
 
 ### Known issues and limitations
 
-- Moodyrain uses a very rudimentary config file that will get confused when you add new sounds or change the order of the existing ones. I might implement a more sophisticated solution when I have some time on my hands. In the meantime please feel free to contribute pull-requests!
-
-- Resource usage scales linearly with the number of sounds you choose. MoodyRain will launch a new `mpv` instance for each file. While this won't be much of an issue for most users, it might pose a problem if you are planning on composing a particularly complicated soundscape (with more than 10 different tracks)
+- MoodyRain uses a very rudimentary config file that will get confused when adding new sounds or changing the order of the existing ones. I might implement a more sophisticated solution when I have some time on my hands. In the meantime please feel free to contribute pull-requests!
 
 - some `yad` builds suffer from a text misalignment bug. [More details and notes on possible solutions](https://github.com/Glutanimate/PDFMtEd/blob/master/README.md#known-issues).
 
