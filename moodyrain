@@ -136,7 +136,7 @@ player(){
       mpv --loop=inf --vo null --volume="${CustomVolume[$i]}" --gapless-audio=yes "${Sounds[$i]}" > /dev/null 2>&1 &
       PlayerPids+=("$!")
     else
-      play -v $(echo "${CustomVolume[$i]}/10" | awk '{print $1/100}') "${Sounds[$i]}" repeat 199999999 > /dev/null 2>&1 &
+      play -v $(echo "${CustomVolume[$i]}" | awk '{print $1/100}') "${Sounds[$i]}" repeat 199999999 > /dev/null 2>&1 &
       PlayerPids+=("$!")
     fi
   done
